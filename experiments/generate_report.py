@@ -177,7 +177,7 @@ def main():
     doc.add_heading("第八章 实验可复现性",level=1)
     doc.add_paragraph("数据全部来自人工构造和固定种子的程序生成，不使用外部训练数据。该实验属于算子正确性验证，不划分训练、验证和测试集。人工样例用于独立预期值，随机图用于数值与梯度一致性，性能图仅用于延迟测量。数据配置保存在 data/graph_cases.json，许可为本项目自建数据，可随代码使用。")
     add_code(doc,"# 建立环境后安装依赖\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements.txt\n\n# 一键运行\n.\\.venv\\Scripts\\python.exe run_all.py\n\n# 单独测试\n.\\.venv\\Scripts\\python.exe -m pytest -q")
-    doc.add_paragraph("固定随机种子为 20261125，PyTorch 线程数为 1。requirements.txt 保存本次验证版本，results/environment.txt 保存实际解释器与库版本，results/logs/pytest.log 保存测试原始输出。Git 提交哈希由最终验收阶段写入实验汇总；若本地缺少 Git 用户身份，工程会保留所有文件并明确说明未提交原因。")
+    doc.add_paragraph(f"固定随机种子为 20261125，PyTorch 线程数为 1。requirements.txt 保存本次验证版本，results/environment.txt 保存实际解释器与库版本，results/logs/pytest.log 保存测试原始输出。核心代码与实验结果对应的 Git 版本为 {summary['git_head']}。")
 
     doc.add_heading("第九章 实验总结",level=1)
     doc.add_paragraph("实验完成了公式、稠密矩阵实现、边列表消息传递实现与 DGL GraphConv 参考实现之间的闭环验证。人工样例完全符合手算结果，随机无向图和有向图的输出、输入梯度及参数梯度均在 FP32 容差内一致，边界测试覆盖平台要求的 20 类场景。")
