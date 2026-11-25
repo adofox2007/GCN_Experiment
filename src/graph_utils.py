@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable, Literal, Sequence
+from typing import Literal, Sequence
 
 import torch
 
@@ -22,7 +22,18 @@ class ProcessedGraph:
 
 
 def _as_index_tensor(values: Sequence[int] | torch.Tensor, device=None) -> torch.Tensor:
-    return torch.as_tensor(values, dtype=torch.long, device=device).reshape(-1)
+    try:
+        tensor = torch.as_tensor(values, device=device)
+    except (TypeError, ValueError, RuntimeError) as exc:
+        raise TypeError("edge indices must be a one-dimensional integer sequence") from exc
+    if tensor.ndim != 1:
+        raise ValueError("edge indices must be one-dimensional")
+    if tensor.numel() == 0:
+        return tensor.to(dtype=torch.long)
+    integer_dtypes = {torch.uint8, torch.int8, torch.int16, torch.int32, torch.int64}
+    if tensor.dtype not in integer_dtypes:
+        raise TypeError("edge indices must contain integers")
+    return tensor.to(dtype=torch.long)
 
 
 def validate_graph(num_nodes: int, src: torch.Tensor, dst: torch.Tensor) -> None:
@@ -116,9 +127,16 @@ def random_edges(num_nodes: int, num_edges: int, directed: bool, seed: int) -> t
             torch.randint(num_nodes, (num_edges,), generator=generator),
             torch.randint(num_nodes, (num_edges,), generator=generator),
         )
-    pair_count = (num_edges + 1) // 2
+    # A non-self edge needs its reverse, so an odd edge budget cannot consist
+    # only of reciprocal pairs. Use floor(E/2) pairs plus one self-loop. This
+    # preserves the previous even-E behavior and keeps the edge multiset symmetric.
+    pair_count = num_edges // 2
     u = torch.randint(num_nodes, (pair_count,), generator=generator)
     v = torch.randint(num_nodes, (pair_count,), generator=generator)
-    src = torch.cat((u, v))[:num_edges]
-    dst = torch.cat((v, u))[:num_edges]
+    src = torch.cat((u, v))
+    dst = torch.cat((v, u))
+    if num_edges % 2:
+        loop = torch.randint(num_nodes, (1,), generator=generator)
+        src = torch.cat((src, loop))
+        dst = torch.cat((dst, loop))
     return src, dst

@@ -36,7 +36,9 @@ class MessagePassingGCN(nn.Module):
         out_degree, in_degree = out_degree.to(features.device), in_degree.to(features.device)
         out_inv = torch.where(out_degree > 0, out_degree.rsqrt(), torch.zeros_like(out_degree))
         in_inv = torch.where(in_degree > 0, in_degree.rsqrt(), torch.zeros_like(in_degree))
-        aggregated = features.new_zeros((num_nodes, self.in_features))
+        # Keep an explicit zero-valued path to features so a graph with no edges
+        # produces a zero input gradient instead of leaving features.grad as None.
+        aggregated = features * 0.0
         if graph.num_edges:
             edge_norm = out_inv[graph.src] * in_inv[graph.dst]
             messages = features[graph.src] * edge_norm[:, None]

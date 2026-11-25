@@ -60,7 +60,7 @@ def main():
     bench=pd.read_csv(RESULTS/"tables"/"benchmark.csv"); core=bench[bench.scope=="core_excludes_preprocessing"]
     plt.figure(figsize=(7.5,4.5));
     for i,(impl,group) in enumerate(core.groupby("implementation")): plt.plot(group.nodes,group.median_ms,marker="o",label=impl,color=COLORS[i])
-    plt.xlabel("Nodes"); plt.ylabel("Median forward latency (ms)"); plt.title("CPU core forward latency"); plt.legend(); plt.grid(alpha=.2); save("07_runtime_comparison.png")
+    plt.xlabel("Nodes"); plt.ylabel("Median forward computation time (ms)"); plt.title("CPU forward computation time (prebuilt inputs)"); plt.legend(); plt.grid(alpha=.2); save("07_runtime_comparison.png")
     print(f"generated 7 figures in {RESULTS/'figures'}")
 
 

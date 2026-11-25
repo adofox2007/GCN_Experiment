@@ -2,7 +2,7 @@ import pytest
 import torch
 
 from src import ManualGCN, MessagePassingGCN, ReferenceGCN
-from src.graph_utils import adjacency_matrix, preprocess_edges
+from src.graph_utils import adjacency_matrix, preprocess_edges, random_edges
 from tests.helpers import assert_equivalent
 
 
@@ -66,3 +66,24 @@ def test_exactly_one_self_loop_policy():
     adj = adjacency_matrix(graph)
     assert torch.equal(torch.diag(adj), torch.ones(3))
     assert_equivalent(3, ([0, 0, 1], [0, 0, 2]), torch.randn(3, 2), 2, policy="exactly_one")
+
+
+def test_t22_odd_undirected_random_graph_remains_symmetric():
+    src, dst = random_edges(7, 9, directed=False, seed=20261125)
+    assert src.numel() == dst.numel() == 9
+    counts = {}
+    for u, v in zip(src.tolist(), dst.tolist()):
+        counts[(u, v)] = counts.get((u, v), 0) + 1
+    for (u, v), count in counts.items():
+        assert counts.get((v, u), 0) == count
+    assert any(u == v for u, v in zip(src.tolist(), dst.tolist()))
+
+
+def test_t23_edge_indices_require_integer_vectors():
+    for invalid in (([0.0], [1.0]), ([True], [False]), ([[0]], [[1]])):
+        with pytest.raises((TypeError, ValueError), match="integer|one-dimensional"):
+            preprocess_edges(2, invalid)
+    valid = preprocess_edges(2, ([0], [1]), self_loop_policy="none")
+    empty = preprocess_edges(2, ([], []), self_loop_policy="none")
+    assert valid.src.dtype == valid.dst.dtype == torch.long
+    assert empty.src.dtype == empty.dst.dtype == torch.long

@@ -45,7 +45,9 @@ def add_table(doc, headers, rows, widths=None):
         for run in cell.paragraphs[0].runs: run.font.color.rgb=RGBColor(255,255,255); run.font.bold=True; run.font.size=Pt(9)
         cell.paragraphs[0].alignment=WD_ALIGN_PARAGRAPH.CENTER
     for i,row in enumerate(rows):
-        cells=table.add_row().cells
+        added_row=table.add_row()
+        added_row._tr.get_or_add_trPr().append(OxmlElement("w:cantSplit"))
+        cells=added_row.cells
         for j,value in enumerate(row):
             cells[j].text=str(value); cells[j].vertical_alignment=WD_ALIGN_VERTICAL.CENTER; set_cell_border(cells[j])
             if i%2: set_cell_shading(cells[j],LIGHT)
@@ -115,7 +117,7 @@ def main():
     doc.add_heading("第一章 实验目的与任务要求",level=1)
     doc.add_paragraph("本实验验证能否从矩阵公式准确落地一层图卷积，而不是依赖封装层完成关键计算。工作覆盖图预处理、对称归一化、邻居消息聚合、线性更新、偏置、激活和自动微分，并把两种手动实现与 DGL 官方算子置于同一输入、参数和自环策略下比较。")
     doc.add_paragraph("验收重点包括：人工样例具有独立预期值；孤立点、自环、重复边、无边图、零节点图和不同特征维度均有断言；随机有向图遵守 DGL norm=both 的源出度与目标入度约定；数值与梯度误差可核查；性能数据来自实际 CPU 测量。")
-    add_table(doc,["Rubric","本工程证据"],[["正确性与边界验证","22 个 pytest 用例、人工样例日志、数值比较 CSV"],["实现与目标库集成","三种统一接口实现及 DGL GraphConv 基线"],["可复现实验依据","锁定依赖、随机种子、运行命令、环境与日志"],["讲解与分析","公式、形状、策略、复杂度、误差与局限分析"]])
+    add_table(doc,["Rubric","本工程证据"],[["正确性与边界验证",f"{summary['tests']['total']} 个 pytest 用例、人工样例日志、数值比较 CSV"],["实现与目标库集成","三种统一接口实现及 DGL GraphConv 基线"],["可复现实验依据","锁定依赖、随机种子、运行命令、环境与日志"],["讲解与分析","公式、形状、策略、复杂度、误差与局限分析"]])
 
     doc.add_heading("第二章 实验环境与项目结构",level=1)
     env_rows=[[k,v] for k,v in env.items() if k in ["Operating system","CPU","Python","PyTorch","DGL","NumPy","Pandas","Matplotlib","NetworkX","Pytest","Experiment device","Random seed","PyTorch intra-op threads"]]
@@ -141,13 +143,13 @@ def main():
     doc.add_heading("4.3 消息传递实现",level=2)
     doc.add_paragraph("MessagePassingGCN 只保存 src、dst 和每条边的归一化系数，利用 features[src] 生成消息，再以 index_add_ 聚合到 dst。其图结构存储复杂度为 O(N+E)，而稠密矩阵版为 O(N²)。")
     add_table(doc,["实现","图表示","核心聚合","空间复杂度"],[["ManualGCN","稠密 N×N 矩阵","矩阵乘法 S@H","O(N²+NF)"],["MessagePassingGCN","边列表","逐边消息与 index_add_","O(E+NF)"],["DGL GraphConv","DGL 稀疏图","框架优化消息传递","O(E+NF)"]])
-    doc.add_paragraph("复杂度不等于实测速度。小图中 Python 调用、图创建和张量调度开销可能主导延迟，因此性能章节分别报告排除预处理的核心前向和包含预处理的完整流程。")
+    doc.add_paragraph("复杂度不等于实测速度。小图中 Python 调用、图创建和张量调度开销可能主导延迟，因此性能章节分别报告预构建输入条件下的前向计算耗时和包含包装层图处理的完整前向耗时，并明确各实现实际执行的操作。")
 
     doc.add_heading("第五章 人工样例验证",level=1)
     doc.add_paragraph("原图包含 0→1、1→0，节点 2 孤立。H=[[1],[3],[5]]，W=[[1]]，b=0，不使用激活。严格添加单位阵后，节点 0 和 1 的度为 2，节点 2 的度为 1。")
     add_figure(doc,"01_raw_graph.png","图 5-1 原始图结构",4.4); add_figure(doc,"02_graph_with_self_loops.png","图 5-2 严格执行 A 加 I 后的图",4.4)
     add_table(doc,["矩阵","实际值"],[["Ã",fmt_nested(demo["adjacency_after_strict_a_plus_i"])],["D̃",fmt_nested(demo["degree_matrix"])],["S",fmt_nested(demo["normalized_adjacency"])],["M=S@H",fmt_nested(demo["aggregated_features"])]])
-    doc.add_paragraph("由 S 的前两行 [0.5,0.5,0] 得到节点 0 与 1 的聚合值均为 2；孤立节点在添加自环后仅接收自身特征，输出为 5。三种实现的实际输出均为 [[2],[2],[5]]，最大绝对误差为 0。")
+    doc.add_paragraph(f"由 S 的前两行 [0.5,0.5,0] 得到节点 0 与 1 的聚合值均为 2；孤立节点在添加自环后仅接收自身特征，输出为 5。三种实现的实际输出完全相同，实现之间的最大绝对差异为 0；受 FP32 归一化舍入影响，实际输出相对于理论结果 [[2],[2],[5]] 的最大绝对误差为 {summary['manual_example_max_error']:.16g}。")
     add_figure(doc,"03_adjacency_heatmap.png","图 5-3 加自环邻接矩阵",4.2); add_figure(doc,"04_normalized_adjacency_heatmap.png","图 5-4 归一化邻接矩阵",4.2); add_figure(doc,"05_output_comparison.png","图 5-5 三种实现输出对比",6.0)
 
     doc.add_heading("第六章 正确性与边界测试",level=1)
@@ -171,13 +173,13 @@ def main():
     doc.add_heading("7.3 CPU 性能",level=2)
     core=bench[bench.scope=="core_excludes_preprocessing"]
     add_table(doc,["实现","N","E 原始","重复次数","中位数 ms","IQR ms"],[[r.implementation,r.nodes,r.raw_edges,r.repeats,f"{r.median_ms:.4f}",f"{r.iqr_ms:.4f}"] for _,r in core.iterrows()])
-    add_figure(doc,"07_runtime_comparison.png","图 7-2 CPU 核心前向延迟",6.1)
-    doc.add_paragraph("测试固定单线程、相同输入与参数，并先预热 5 次。核心前向排除图预处理；完整流程另存于 benchmark.csv。实测结果不支持简单断言某种实现始终最快：稠密矩阵在小规模上可能受益于连续矩阵运算，而随着 N 增大其 O(N²) 存储和计算成本迅速增加；边列表与 DGL 的优势更依赖稀疏度、算子调度和图复用。本文未把理论复杂度冒充实测内存。")
+    add_figure(doc,"07_runtime_comparison.png","图 7-2 CPU 前向计算耗时（预构建输入）",6.1)
+    doc.add_paragraph("测试固定单线程、相同输入与参数，并先预热 5 次。测量时未使用 torch.no_grad 或 inference_mode，自动微分记录处于开启状态，但不执行反向传播。预构建输入记录中，ManualGCN 复用归一化邻接矩阵，MessagePassingGCN 复用边归一化系数，DGL GraphConv 复用已构建的 DGL 图但仍在层内部计算度归一化；因此该组数据表示各自在预构建输入条件下的前向计算耗时，并非统一排除了完全相同的预处理。包含包装层图处理的完整前向数据另存于 benchmark.csv。实测结果不支持简单断言某种实现始终最快：稠密矩阵在小规模上可能受益于连续矩阵运算，而随着 N 增大其 O(N²) 存储和计算成本迅速增加；边列表与 DGL 的优势更依赖稀疏度、算子调度和图复用。本文未把理论复杂度冒充实测内存。")
 
     doc.add_heading("第八章 实验可复现性",level=1)
     doc.add_paragraph("数据全部来自人工构造和固定种子的程序生成，不使用外部训练数据。该实验属于算子正确性验证，不划分训练、验证和测试集。人工样例用于独立预期值，随机图用于数值与梯度一致性，性能图仅用于延迟测量。数据配置保存在 data/graph_cases.json，许可为本项目自建数据，可随代码使用。")
     add_code(doc,"# 建立环境后安装依赖\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements.txt\n\n# 一键运行\n.\\.venv\\Scripts\\python.exe run_all.py\n\n# 单独测试\n.\\.venv\\Scripts\\python.exe -m pytest -q")
-    doc.add_paragraph(f"固定随机种子为 20261125，PyTorch 线程数为 1。requirements.txt 保存本次验证版本，results/environment.txt 保存实际解释器与库版本，results/logs/pytest.log 保存测试原始输出。核心代码与实验结果对应的 Git 版本为 {summary['git_head']}。")
+    doc.add_paragraph("固定随机种子为 20261125，PyTorch 线程数为 1。requirements.txt 保存本次验证版本，results/environment.txt 保存实际解释器与库版本，results/logs/pytest.log 保存测试原始输出。本次集中修复的 Git 提交信息为 fix: resolve final review issues and prepare submission，提交哈希以仓库最终 HEAD 为准。")
 
     doc.add_heading("第九章 实验总结",level=1)
     doc.add_paragraph("实验完成了公式、稠密矩阵实现、边列表消息传递实现与 DGL GraphConv 参考实现之间的闭环验证。人工样例完全符合手算结果，随机无向图和有向图的输出、输入梯度及参数梯度均在 FP32 容差内一致，边界测试覆盖平台要求的 20 类场景。")
