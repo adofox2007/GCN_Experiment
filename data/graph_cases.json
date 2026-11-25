@@ -1,0 +1,24 @@
+{
+  "version": "1.0",
+  "random_seed": 20261125,
+  "manual_case": {
+    "num_nodes": 3,
+    "src": [0, 1],
+    "dst": [1, 0],
+    "features": [[1.0], [3.0], [5.0]],
+    "weight": [[1.0]],
+    "bias": [0.0],
+    "expected_output": [[2.0], [2.0], [5.0]]
+  },
+  "numerical_cases": [
+    {"name": "small_scalar", "nodes": 10, "raw_edges": 24, "in_features": 1, "out_features": 1, "directed": false},
+    {"name": "directed_expand", "nodes": 50, "raw_edges": 180, "in_features": 4, "out_features": 8, "directed": true},
+    {"name": "medium_equal", "nodes": 100, "raw_edges": 500, "in_features": 16, "out_features": 16, "directed": false},
+    {"name": "large_compress", "nodes": 500, "raw_edges": 2500, "in_features": 64, "out_features": 32, "directed": true}
+  ],
+  "benchmark_cases": [
+    {"nodes": 10, "raw_edges": 30, "repeats": 50},
+    {"nodes": 100, "raw_edges": 500, "repeats": 40},
+    {"nodes": 500, "raw_edges": 3000, "repeats": 25}
+  ]
+}

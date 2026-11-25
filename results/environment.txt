@@ -1,0 +1,18 @@
+Operating system: Windows-10-10.0.26200-SP0
+CPU: Intel(R) Core(TM) i9-14900HX
+Logical CPU count: 32
+Python: 3.10.20 | packaged by Anaconda, Inc. | (main, Jun 11 2026, 15:13:20) [MSC v.1942 64 bit (AMD64)]
+Python executable: E:\作业\算子开发\GCN_Experiment\.venv\Scripts\python.exe
+PyTorch: 2.5.1
+DGL: 1.1.2
+NumPy: 2.0.1
+Pandas: 2.3.3
+Matplotlib: 3.10.9
+NetworkX: 3.4.2
+Pytest: 9.0.1
+python-docx: 1.2.0
+Experiment device: CPU (CUDA_VISIBLE_DEVICES is empty; all tensors created on CPU)
+CUDA available in base build: True
+Random seed: 20261125
+PyTorch intra-op threads: 1
+DGL backend: pytorch

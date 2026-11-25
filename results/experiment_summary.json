@@ -1,0 +1,67 @@
+{
+  "tests": {
+    "total": 22,
+    "passed": 22,
+    "failed": 0,
+    "skipped": 0
+  },
+  "manual_example_outputs": {
+    "manual_dense": [
+      [
+        1.9999998807907104
+      ],
+      [
+        1.9999998807907104
+      ],
+      [
+        5.0
+      ]
+    ],
+    "message_passing": [
+      [
+        1.9999998807907104
+      ],
+      [
+        1.9999998807907104
+      ],
+      [
+        5.0
+      ]
+    ],
+    "dgl_reference": [
+      [
+        1.9999998807907104
+      ],
+      [
+        1.9999998807907104
+      ],
+      [
+        5.0
+      ]
+    ]
+  },
+  "manual_example_max_error": 1.1920928955078125e-07,
+  "max_numerical_error": 3.7997961044311523e-07,
+  "max_input_gradient_error": 3.725290298461914e-09,
+  "max_weight_gradient_error": 3.725290298461914e-09,
+  "all_comparisons_passed": true,
+  "figures": 7,
+  "benchmark_fastest_by_size": [
+    {
+      "nodes": 10,
+      "implementation": "ManualGCN",
+      "median_ms": 0.0082
+    },
+    {
+      "nodes": 100,
+      "implementation": "ManualGCN",
+      "median_ms": 0.0457
+    },
+    {
+      "nodes": 500,
+      "implementation": "ManualGCN",
+      "median_ms": 0.2788
+    }
+  ],
+  "git_head": "not committed yet"
+}

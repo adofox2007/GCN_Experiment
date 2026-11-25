@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.idea/
+.vscode/
+*.tmp
+*.temp
+*.bak
+.env
+.env.*
+*.pem
+*.key
+results/pytest_report.xml
+results/docx_render/

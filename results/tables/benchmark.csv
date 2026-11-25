@@ -1,0 +1,19 @@
+﻿implementation,scope,nodes,raw_edges,processed_edges,in_features,out_features,threads,warmup,repeats,median_ms,iqr_ms
+ManualGCN,core_excludes_preprocessing,10,30,40,16,16,1,5,50,0.0082,0.00040000000000000105
+MessagePassingGCN,core_excludes_preprocessing,10,30,40,16,16,1,5,50,0.0193,0.00030000000000000165
+DGL GraphConv,core_excludes_preprocessing,10,30,40,16,16,1,5,50,0.5648500000000001,0.19530000000000003
+ManualGCN,full_includes_preprocessing,10,30,40,16,16,1,5,50,0.1164,0.006100000000000008
+MessagePassingGCN,full_includes_preprocessing,10,30,40,16,16,1,5,50,0.12204999999999999,0.0247
+DGL GraphConv,full_includes_preprocessing,10,30,40,16,16,1,5,50,10.0811,0.6633000000000013
+ManualGCN,core_excludes_preprocessing,100,500,600,16,16,1,5,40,0.0457,0.0295
+MessagePassingGCN,core_excludes_preprocessing,100,500,600,16,16,1,5,40,0.0489,0.0015999999999999973
+DGL GraphConv,core_excludes_preprocessing,100,500,600,16,16,1,5,40,1.3367,0.06020000000000003
+ManualGCN,full_includes_preprocessing,100,500,600,16,16,1,5,40,0.42355,0.016000000000000014
+MessagePassingGCN,full_includes_preprocessing,100,500,600,16,16,1,5,40,0.46130000000000004,0.02240000000000003
+DGL GraphConv,full_includes_preprocessing,100,500,600,16,16,1,5,40,2.0654000000000003,0.20210000000000017
+ManualGCN,core_excludes_preprocessing,500,3000,3500,16,16,1,5,25,0.2788,0.003200000000000036
+MessagePassingGCN,core_excludes_preprocessing,500,3000,3500,16,16,1,5,25,0.3901,0.007400000000000018
+DGL GraphConv,core_excludes_preprocessing,500,3000,3500,16,16,1,5,25,1.4837,0.06499999999999995
+ManualGCN,full_includes_preprocessing,500,3000,3500,16,16,1,5,25,0.9599,0.026599999999999957
+MessagePassingGCN,full_includes_preprocessing,500,3000,3500,16,16,1,5,25,0.8271,0.04789999999999994
+DGL GraphConv,full_includes_preprocessing,500,3000,3500,16,16,1,5,25,2.1382,0.16949999999999976
